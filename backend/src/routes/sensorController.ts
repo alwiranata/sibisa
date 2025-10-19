@@ -4,5 +4,6 @@ const sensorRouter = express.Router()
 
 sensorRouter.get("/sensor", getSensorData)
 sensorRouter.post("/sensor", addSensorData)
+sensorRouter.post("/ideSensor", addSensorData)
 
 export default sensorRouter
