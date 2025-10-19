@@ -67,7 +67,7 @@ const AllSensor = () => {
 				return
 			}
 
-			const response = await fetch("http://localhost:5000/api/sensor", {
+			const response = await fetch("http://72.60.236.51:5000/api/sensor", {
 				headers: {
 					Authorization: `Bearer ${token}`,
 					"Content-Type": "application/json",
@@ -205,7 +205,7 @@ const AllSensor = () => {
 												{status}
 											</td>
 										</tr>
-									) 
+									)
 								})
 							) : (
 								<tr>
@@ -231,7 +231,7 @@ const AllSensor = () => {
 					className='w-10 h-10'
 					src='./excel.jpg'
 					alt=''
-                    onClick={handleExportExcel}
+					onClick={handleExportExcel}
 				/>
 			</div>
 			{/* 🌧️ Curah Hujan */}
