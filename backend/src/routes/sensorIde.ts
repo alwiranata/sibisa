@@ -1,7 +1,7 @@
 import express from "express"
-import {addSensorData} from "../controllers/sensorController"
+import { addSensorDataIde } from "../controllers/sensorIdeController"
 const sensorIdeRouter = express.Router()
 
-sensorIdeRouter.post("/sensorIde", addSensorData)
+sensorIdeRouter.post("/sensorIde", addSensorDataIde)
 
 export default sensorIdeRouter
