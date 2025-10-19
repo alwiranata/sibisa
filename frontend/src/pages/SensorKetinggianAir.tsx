@@ -42,7 +42,7 @@ const SensorKetinggianAir = () => {
 		const fetchData = async () => {
 			try {
 				const token = localStorage.getItem("token")
-				const res = await fetch("http://localhost:5000/api/sensor", {
+				const res = await fetch("http://72.60.236.51:5000/api/sensor", {
 					headers: {
 						Authorization: `Bearer ${token}`,
 						"Content-Type": "application/json",

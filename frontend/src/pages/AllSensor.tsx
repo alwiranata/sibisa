@@ -28,7 +28,7 @@ const AllSensor = () => {
 					return
 				}
 
-				const response = await fetch("http://localhost:5000/api/sensor", {
+				const response = await fetch("http://72.60.236.51:5000/api/sensor", {
 					headers: {
 						Authorization: `Bearer ${token}`,
 						"Content-Type": "application/json",
