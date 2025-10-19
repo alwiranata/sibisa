@@ -11,7 +11,6 @@ appRouter.use("/api", sensorIdeRouter)
 
 //harus login dulu
 appRouter.use(authMiddleware)
-
 appRouter.use("/api", sensorRouter)
 
 export default appRouter

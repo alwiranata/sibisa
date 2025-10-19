@@ -1,5 +1,5 @@
 import express from "express"
-import {addSensorData, getSensorData} from "../controllers/sensorController"
+import {addSensorData} from "../controllers/sensorController"
 const sensorIdeRouter = express.Router()
 
 sensorIdeRouter.post("/sensorIde", addSensorData)
