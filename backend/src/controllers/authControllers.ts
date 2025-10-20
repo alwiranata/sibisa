@@ -22,9 +22,10 @@ export const Login = async (req: Request, res: Response) => {
 			return res.status(400).json({message: "password salah"})
 		}
 
-		const token = jwt.sign({id: user.id, username: user.username}, JWT_SECRET, {
-			expiresIn: "1h",
-		})
+		const token = jwt.sign(
+			{id: user.id, username: user.username},
+			JWT_SECRET // ← tidak ada expiresIn di sini
+		)
 
 		res.json({
 			message: "Login berhasil",
