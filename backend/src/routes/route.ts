@@ -6,11 +6,8 @@ import {authMiddleware} from "../middlewares/authMiddleware"
 
 const appRouter = express.Router()
 
-appRouter.use("/api", sensorIdeRouter)
 appRouter.use("/api", authRouter)
-
-//harus login dulu
-appRouter.use(authMiddleware)
-appRouter.use("/api", sensorRouter)
+appRouter.use("/api", sensorIdeRouter, authMiddleware)
+appRouter.use("/api", sensorRouter, authMiddleware)
 
 export default appRouter
