@@ -24,10 +24,13 @@ export const addSensorData = async (req: Request, res: Response) => {
 		}
 
 		let status_air = ""
-		if (dataSensor.ketinggian_air > 5 && dataSensor.ketinggian_air <= 50) {
-			status_air = "Siaga"
-		} else if (dataSensor.ketinggian_air > 50) {
+		if (dataSensor.ketinggian_air < 36 && dataSensor.ketinggian_air > 0) {
 			status_air = "Bahaya"
+		} else if (
+			dataSensor.ketinggian_air >= 36 &&
+			dataSensor.ketinggian_air <= 75
+		) {
+			status_air = "Siaga"
 		} else {
 			status_air = "Aman"
 		}
