@@ -175,9 +175,9 @@ const SensorSuhu = () => {
 					</h1>
 					<p
 						className={`m-2 w-[90%] h-full bg-white rounded-[8px] text-center flex justify-center items-center  font-black ${
-							latestData?.status_suhu === "Suhu Panas"
+							latestData?.status_suhu === "Panas"
 								? "text-red-600"
-								: latestData?.status_suhu === "Suhu Lembap"
+								: latestData?.status_suhu === "Lembap"
 								? "text-blue-600"
 								: "text-green-600"
 						}
