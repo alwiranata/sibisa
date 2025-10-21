@@ -90,7 +90,7 @@ const SensorKetinggianAir = () => {
 		labels,
 		datasets: [
 			{
-				label: "Ketinggian Air (cm)",
+				label: "Ketinggian Air Dari Sensor (cm)",
 				data: limitedData.map((item) => item.ketinggian_air),
 				fill: false,
 				borderColor: "rgb(54, 162, 235)",
@@ -107,7 +107,7 @@ const SensorKetinggianAir = () => {
 		},
 		scales: {
 			x: {title: {display: true, text: "Waktu"}},
-			y: {title: {display: true, text: "Ketinggian Air (cm)"}},
+			y: {title: {display: true, text: "Ketinggian Air Dari Sensor (cm)"}},
 		},
 	}
 
