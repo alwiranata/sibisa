@@ -6,10 +6,10 @@ export const addSensorDataIde = async (req: Request, res: Response) => {
 	try {
 		const dataSensor: sensorModel = req.body
 		if (
-			!dataSensor.curah_hujan ||
-			!dataSensor.ketinggian_air ||
-			!dataSensor.suhu_udara ||
-			!dataSensor.kecepatan_angin
+			dataSensor.curah_hujan == null ||
+			dataSensor.ketinggian_air == null ||
+			dataSensor.suhu_udara == null ||
+			dataSensor.kecepatan_angin == null
 		) {
 			return res.status(400).json({message: "Data tidak Lengkap"})
 		}
@@ -24,11 +24,11 @@ export const addSensorDataIde = async (req: Request, res: Response) => {
 		}
 
 		let status_air = ""
-		if (dataSensor.ketinggian_air > 0 && dataSensor.ketinggian_air <= 30) {
+		if (dataSensor.ketinggian_air > 80 && dataSensor.ketinggian_air <= 110) {
 			status_air = "Normal"
 		} else if (
-			dataSensor.ketinggian_air > 30 &&
-			dataSensor.ketinggian_air <= 60
+			dataSensor.ketinggian_air > 50 &&
+			dataSensor.ketinggian_air <= 79
 		) {
 			status_air = "Siaga"
 		} else {
