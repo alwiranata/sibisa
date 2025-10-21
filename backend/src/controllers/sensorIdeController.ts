@@ -24,14 +24,14 @@ export const addSensorDataIde = async (req: Request, res: Response) => {
 		}
 
 		let status_air = ""
-		if (dataSensor.ketinggian_air > 80 && dataSensor.ketinggian_air <= 110) {
+		if (dataSensor.ketinggian_air > 80 ) {
 			status_air = "Normal"
 		} else if (
 			dataSensor.ketinggian_air > 50 &&
-			dataSensor.ketinggian_air <= 79
+			dataSensor.ketinggian_air <= 80
 		) {
 			status_air = "Siaga"
-		} else if (dataSensor.ketinggian_air <= 50) {
+		} else if (dataSensor.ketinggian_air <= 50 ) {
 			status_air = "Bahaya"
 		}
 
