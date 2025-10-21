@@ -31,7 +31,7 @@ export const addSensorDataIde = async (req: Request, res: Response) => {
 			dataSensor.ketinggian_air <= 79
 		) {
 			status_air = "Siaga"
-		} else {
+		} else if (dataSensor.ketinggian_air <= 50) {
 			status_air = "Bahaya"
 		}
 
