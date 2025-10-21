@@ -60,7 +60,7 @@ const SensorSuhu = () => {
 		}
 
 		fetchData()
-		const interval = setInterval(fetchData)
+		const interval = setInterval(fetchData ,1000)
 		return () => clearInterval(interval)
 	}, [])
 
