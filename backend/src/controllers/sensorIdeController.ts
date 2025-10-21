@@ -15,7 +15,7 @@ export const addSensorDataIde = async (req: Request, res: Response) => {
 		}
 
 		let status_hujan = ""
-		if (dataSensor.curah_hujan < 0 && dataSensor.curah_hujan <= 3) {
+		if (dataSensor.curah_hujan <= 0 && dataSensor.curah_hujan <= 3) {
 			status_hujan = "Cerah"
 		} else if (dataSensor.curah_hujan < 4 && dataSensor.curah_hujan < 15) {
 			status_hujan = "Hujan Sedang"
