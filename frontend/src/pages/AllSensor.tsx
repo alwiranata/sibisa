@@ -19,7 +19,6 @@ const AllSensor = () => {
 	const [data, setData] = useState<SensorData[]>([])
 	const [loading, setLoading] = useState(true)
 
-	// ✅ Ambil 5 data terbaru untuk tampilan
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
@@ -39,23 +38,30 @@ const AllSensor = () => {
 				if (!response.ok) throw new Error("Gagal memuat data sensor")
 
 				const result = await response.json()
-				setData(result)
+
+				// Urutkan dari yang terbaru
+				const sorted = result.sort(
+					(a: SensorData, b: SensorData) =>
+						new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+				)
+
+				setData(sorted)
 			} catch (error) {
-				console.error("Error saat ambil data:", error)
+				console.error("Error:", error)
 			} finally {
 				setLoading(false)
 			}
 		}
 
 		fetchData()
-		const interval = setInterval(fetchData, 2000)
+		const interval = setInterval(fetchData, 1000)
 		return () => clearInterval(interval)
 	}, [])
 
-	// ✅ Export semua data ke Excel
 	const handleExportExcel = async () => {
 		try {
 			const token = localStorage.getItem("token")
+
 			if (!token) {
 				alert("Token tidak ditemukan. Silakan login terlebih dahulu.")
 				return
@@ -68,18 +74,23 @@ const AllSensor = () => {
 				},
 			})
 
-			if (!response.ok) throw new Error("Gagal mengambil semua data sensor")
+			if (response.status === 401) {
+				alert("Token tidak valid atau sudah kedaluwarsa. Silakan login ulang.")
+				return
+			}
 
-			const allData = await response.json()
-			if (!Array.isArray(allData) || allData.length === 0) {
+			const dataSensorList = await response.json()
+
+			if (!Array.isArray(dataSensorList) || dataSensorList.length === 0) {
 				alert("Tidak ada data sensor untuk diekspor.")
 				return
 			}
 
-			const formattedData = allData.map((item: SensorData) => ({
+			// ✅ Format data biar rapi
+			const formattedData = dataSensorList.map((item: SensorData) => ({
 				"Curah Hujan (mm)": item.curah_hujan,
 				"Ketinggian Air (cm)": item.ketinggian_air,
-				"Suhu Udara (°C)": item.suhu_udara,
+				"Suhu Udara (°c)": item.suhu_udara,
 				"Kecepatan Angin (km/j)": item.kecepatan_angin,
 				"Status Curah Hujan": item.status_hujan,
 				"Status Air": item.status_air,
@@ -91,23 +102,28 @@ const AllSensor = () => {
 				}),
 			}))
 
+			// ✅ Buat workbook baru
 			const workbook = new ExcelJS.Workbook()
 			const worksheet = workbook.addWorksheet("Data Sensor")
 
+			// Tambahkan header otomatis dari kunci data
 			worksheet.columns = Object.keys(formattedData[0]).map((key) => ({
 				header: key,
 				key,
 				width: 20,
 			}))
 
+			// Tambahkan semua data
 			formattedData.forEach((item) => worksheet.addRow(item))
 
+			// ✅ Rata tengah semua cell
 			worksheet.eachRow((row) => {
 				row.eachCell((cell) => {
 					cell.alignment = {horizontal: "center", vertical: "middle"}
 				})
 			})
 
+			// ✅ Header tebal dan background abu-abu
 			worksheet.getRow(1).eachCell((cell) => {
 				cell.font = {bold: true}
 				cell.fill = {
@@ -117,134 +133,167 @@ const AllSensor = () => {
 				}
 			})
 
+			// ✅ Simpan ke file Excel
 			const buffer = await workbook.xlsx.writeBuffer()
 			saveAs(new Blob([buffer]), "data_sensor.xlsx")
-			alert("✅ Data berhasil diekspor ke Excel!")
+
+			alert("Data berhasil diekspor ke Excel ")
 		} catch (error) {
-			console.error("Gagal export data ke Excel:", error)
+			console.error("Gagal export Excel:", error)
 			alert("Terjadi kesalahan saat export data.")
 		}
 	}
 
 	if (loading) return <p className='text-center mt-10'>Memuat data sensor...</p>
 
-	// ✅ Fungsi warna status
-	const getStatusColor = (status: string) => {
-		switch (status.toLowerCase()) {
-			case "normal":
-				return "bg-green-100 text-green-700 font-semibold"
-			case "siaga":
-				return "bg-yellow-100 text-yellow-700 font-semibold"
-			case "bahaya":
-				return "bg-red-100 text-red-700 font-semibold"
-			default:
-				return "bg-gray-100 text-gray-600"
-		}
+	// 🧩 Komponen tabel reusable
+	const SensorTable = ({
+		title,
+		field,
+		statusField,
+		unit,
+		colorCondition,
+	}: {
+		title: string
+		field: keyof SensorData
+		statusField: keyof SensorData
+		unit: string
+		colorCondition: (status: string) => string
+	}) => {
+		const latestFive = data.slice(0, 5) // ✅ ambil hanya 5 data
+		return (
+			<div className='mb-8'>
+				<h2 className='text-xl font-bold mb-2 text-[#2F4752]'>{title}</h2>
+				<div className='overflow-x-auto'>
+					<table className='min-w-full border border-gray-300 bg-white rounded-lg'>
+						<thead className='bg-[#2F4752] text-white text-sm'>
+							<tr>
+								<th className='px-4 py-2 text-center'>No</th>
+								<th className='px-4 py-2 text-center'>Tanggal & Waktu</th>
+								<th className='px-4 py-2 text-center'>
+									Nilai {title} ({unit})
+								</th>
+								<th className='px-4 py-2 text-center'>Status</th>
+							</tr>
+						</thead>
+						<tbody>
+							{latestFive.length > 0 ? (
+								latestFive.map((item, index) => {
+									const value = item[field]
+									const status = String(item[statusField])
+
+									return (
+										<tr
+											key={`${title}-${item.id}`}
+											className={`text-center text-sm border-t ${
+												index % 2 === 0 ? "bg-gray-50" : "bg-white"
+											}`}
+										>
+											<td className='px-3 py-2'>{index + 1}</td>
+											<td className='px-3 py-2'>
+												{new Date(item.createdAt).toLocaleString("id-ID", {
+													dateStyle: "short",
+													timeStyle: "medium",
+												})}
+											</td>
+											<td className='px-3 py-2'>{value}</td>
+											<td
+												className={`px-3 py-2 font-semibold ${colorCondition(
+													status
+												)}`}
+											>
+												{status}
+											</td>
+										</tr>
+									)
+								})
+							) : (
+								<tr>
+									<td
+										colSpan={4}
+										className='text-center py-4 text-gray-500'
+									>
+										Tidak ada data {title.toLowerCase()}.
+									</td>
+								</tr>
+							)}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		)
 	}
 
-	// ✅ Komponen tabel dengan status
 	return (
 		<div className='p-6'>
-			<div className='flex row justify-end mb-10'>
+			<div className=' flex row justify-end mb-10'>
 				<img
-					className='w-10 h-10 cursor-pointer'
+					className='w-10 h-10'
 					src='./excel.jpg'
-					alt='Export ke Excel'
+					alt=''
 					onClick={handleExportExcel}
 				/>
 			</div>
+			{/* 🌧️ Curah Hujan */}
+			<SensorTable
+				title='Curah Hujan'
+				field='curah_hujan'
+				statusField='status_hujan'
+				unit='mm'
+				colorCondition={(status) =>
+					status === "Hujan Lebat"
+						? "text-red-600"
+						: status === "Hujan Sedang"
+						? "text-blue-600"
+						: "text-green-600"
+				}
+			/>
 
-			<h2 className='text-xl font-bold mb-4 text-[#2F4752]'>
-				Semua Data Sensor Terbaru
-			</h2>
+			{/* 🌊 Ketinggian Air */}
+			<SensorTable
+				title='Ketinggian Air'
+				field='ketinggian_air'
+				statusField='status_air'
+				unit='cm'
+				colorCondition={(status) =>
+					status === "Bahaya"
+						? "text-red-600"
+						: status === "Siaga"
+						? "text-yellow-600"
+						: "text-green-600"
+				}
+			/>
 
-			<div className='overflow-x-auto'>
-				<table className='min-w-full border border-gray-300 bg-white rounded-lg text-sm'>
-					<thead className='bg-[#2F4752] text-white'>
-						<tr>
-							<th className='px-4 py-2'>No</th>
-							<th className='px-4 py-2'>Curah Hujan (mm)</th>
-							<th className='px-4 py-2'>Status Hujan</th>
-							<th className='px-4 py-2'>Ketinggian Air (cm)</th>
-							<th className='px-4 py-2'>Status Air</th>
-							<th className='px-4 py-2'>Suhu Udara (°C)</th>
-							<th className='px-4 py-2'>Status Suhu</th>
-							<th className='px-4 py-2'>Kecepatan Angin (km/j)</th>
-							<th className='px-4 py-2'>Status Angin</th>
-							<th className='px-4 py-2'>Tanggal & Waktu</th>
-						</tr>
-					</thead>
-					<tbody>
-						{data.length > 0 ? (
-							data.map((item, index) => (
-								<tr
-									key={item.id}
-									className={`text-center border-t ${
-										index % 2 === 0 ? "bg-gray-50" : "bg-white"
-									}`}
-								>
-									<td className='py-2'>{index + 1}</td>
-									<td>{item.curah_hujan}</td>
-									<td>
-										<span
-											className={`px-2 py-1 rounded-full text-xs ${getStatusColor(
-												item.status_hujan
-											)}`}
-										>
-											{item.status_hujan}
-										</span>
-									</td>
-									<td>{item.ketinggian_air}</td>
-									<td>
-										<span
-											className={`px-2 py-1 rounded-full text-xs ${getStatusColor(
-												item.status_air
-											)}`}
-										>
-											{item.status_air}
-										</span>
-									</td>
-									<td>{item.suhu_udara}</td>
-									<td>
-										<span
-											className={`px-2 py-1 rounded-full text-xs ${getStatusColor(
-												item.status_suhu
-											)}`}
-										>
-											{item.status_suhu}
-										</span>
-									</td>
-									<td>{item.kecepatan_angin}</td>
-									<td>
-										<span
-											className={`px-2 py-1 rounded-full text-xs ${getStatusColor(
-												item.status_angin
-											)}`}
-										>
-											{item.status_angin}
-										</span>
-									</td>
-									<td>
-										{new Date(item.createdAt).toLocaleString("id-ID", {
-											dateStyle: "short",
-											timeStyle: "medium",
-										})}
-									</td>
-								</tr>
-							))
-						) : (
-							<tr>
-								<td
-									colSpan={10}
-									className='text-center py-4 text-gray-500'
-								>
-									Tidak ada data sensor.
-								</td>
-							</tr>
-						)}
-					</tbody>
-				</table>
-			</div>
+			{/* 🌡️ Suhu Udara */}
+			<SensorTable
+				title='Suhu Udara'
+				field='suhu_udara'
+				statusField='status_suhu'
+				unit='°C'
+				colorCondition={
+					(status) =>
+						status === "Suhu Panas"
+							? "text-red-600"
+							: status === "Suhu Lembap"
+							? "text-blue-600"
+							: "text-green-600" // Suhu Normal
+				}
+			/>
+
+			{/* 💨 Kecepatan Angin */}
+			<SensorTable
+				title='Kecepatan Angin'
+				field='kecepatan_angin'
+				statusField='status_angin'
+				unit='km/j'
+				colorCondition={(status) =>
+					status === "Angin Kencang"
+						? "text-red-600"
+						: status === "Angin Sedang"
+						? "text-yellow-600"
+						: "text-blue-600"
+				}
+			/>
 		</div>
 	)
 }
