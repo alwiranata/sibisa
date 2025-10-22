@@ -39,7 +39,7 @@ const AllSensor = () => {
 				if (!response.ok) throw new Error("Gagal memuat data sensor")
 
 				const result = await response.json()
-				setData(result)
+				setData(result.slice(0, 5)) // hanya ambil 5 data terbaru
 			} catch (error) {
 				console.error("Error saat ambil data:", error)
 			} finally {
@@ -80,12 +80,12 @@ const AllSensor = () => {
 
 			const formattedData = allData.map((item: SensorData) => ({
 				"Curah Hujan (mm)": item.curah_hujan,
-				"Ketinggian Air (cm)": item.ketinggian_air,
-				"Suhu Udara (°C)": item.suhu_udara,
-				"Kecepatan Angin (km/j)": item.kecepatan_angin,
 				"Status Curah Hujan": item.status_hujan,
+				"Ketinggian Air (cm)": item.ketinggian_air,
 				"Status Air": item.status_air,
+				"Suhu Udara (°C)": item.suhu_udara,
 				"Status Suhu": item.status_suhu,
+				"Kecepatan Angin (km/j)": item.kecepatan_angin,
 				"Status Angin": item.status_angin,
 				"Tanggal & Waktu": new Date(item.createdAt).toLocaleString("id-ID", {
 					dateStyle: "short",
@@ -131,7 +131,76 @@ const AllSensor = () => {
 
 	if (loading) return <p className='text-center mt-10'>Memuat data sensor...</p>
 
-	// ✅ Komponen tabel sederhana
+	// ✅ Komponen reusable untuk tabel tiap sensor
+	const SensorTable = ({
+		title,
+		valueKey,
+		statusKey,
+		unit,
+		colorCondition,
+	}: {
+		title: string
+		valueKey: keyof SensorData
+		statusKey: keyof SensorData
+		unit: string
+		colorCondition: (status: string) => string
+	}) => (
+		<div className='mb-10'>
+			<h2 className='text-xl font-bold mb-3 text-[#2F4752]'>{title}</h2>
+			<div className='overflow-x-auto'>
+				<table className='min-w-full border border-gray-300 bg-white rounded-lg'>
+					<thead className='bg-[#2F4752] text-white text-sm'>
+						<tr>
+							<th className='px-4 py-2 text-center'>No</th>
+							<th className='px-4 py-2 text-center'>Tanggal & Waktu</th>
+							<th className='px-4 py-2 text-center'>Nilai ({unit})</th>
+							<th className='px-4 py-2 text-center'>Status</th>
+						</tr>
+					</thead>
+					<tbody>
+						{data.length > 0 ? (
+							data.map((item, index) => {
+								const status = String(item[statusKey])
+								return (
+									<tr
+										key={`${title}-${item.id}`}
+										className={`text-center border-t ${
+											index % 2 === 0 ? "bg-gray-50" : "bg-white"
+										}`}
+									>
+										<td className='py-2'>{index + 1}</td>
+										<td className='py-2'>
+											{new Date(item.createdAt).toLocaleString("id-ID", {
+												dateStyle: "short",
+												timeStyle: "medium",
+											})}
+										</td>
+										<td className='py-2'>{item[valueKey]}</td>
+										<td
+											className={`py-2 font-semibold ${colorCondition(status)}`}
+										>
+											{status}
+										</td>
+									</tr>
+								)
+							})
+						) : (
+							<tr>
+								<td
+									colSpan={4}
+									className='text-center py-3 text-gray-500'
+								>
+									Tidak ada data {title.toLowerCase()}.
+								</td>
+							</tr>
+						)}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	)
+
+	// ✅ Render empat sensor
 	return (
 		<div className='p-6'>
 			<div className='flex row justify-end mb-10'>
@@ -143,57 +212,65 @@ const AllSensor = () => {
 				/>
 			</div>
 
-			<h2 className='text-xl font-bold mb-4 text-[#2F4752]'>
-				5 Data Sensor Terbaru
-			</h2>
+			{/* 🌧️ Curah Hujan */}
+			<SensorTable
+				title='Curah Hujan'
+				valueKey='curah_hujan'
+				statusKey='status_hujan'
+				unit='mm'
+				colorCondition={(status) =>
+					status === "Hujan Lebat"
+						? "text-red-600"
+						: status === "Hujan Sedang"
+						? "text-blue-600"
+						: "text-green-600"
+				}
+			/>
 
-			<div className='overflow-x-auto'>
-				<table className='min-w-full border border-gray-300 bg-white rounded-lg'>
-					<thead className='bg-[#2F4752] text-white text-sm'>
-						<tr>
-							<th className='px-4 py-2'>No</th>
-							<th className='px-4 py-2'>Curah Hujan (mm)</th>
-							<th className='px-4 py-2'>Ketinggian Air (cm)</th>
-							<th className='px-4 py-2'>Suhu Udara (°C)</th>
-							<th className='px-4 py-2'>Kecepatan Angin (km/j)</th>
-							<th className='px-4 py-2'>Tanggal & Waktu</th>
-						</tr>
-					</thead>
-					<tbody>
-						{data.length > 0 ? (
-							data.map((item, index) => (
-								<tr
-									key={item.id}
-									className={`text-center border-t ${
-										index % 2 === 0 ? "bg-gray-50" : "bg-white"
-									}`}
-								>
-									<td className='py-2'>{index + 1}</td>
-									<td>{item.curah_hujan}</td>
-									<td>{item.ketinggian_air}</td>
-									<td>{item.suhu_udara}</td>
-									<td>{item.kecepatan_angin}</td>
-									<td>
-										{new Date(item.createdAt).toLocaleString("id-ID", {
-											dateStyle: "short",
-											timeStyle: "medium",
-										})}
-									</td>
-								</tr>
-							))
-						) : (
-							<tr>
-								<td
-									colSpan={6}
-									className='text-center py-4 text-gray-500'
-								>
-									Tidak ada data sensor.
-								</td>
-							</tr>
-						)}
-					</tbody>
-				</table>
-			</div>
+			{/* 🌊 Ketinggian Air */}
+			<SensorTable
+				title='Ketinggian Air'
+				valueKey='ketinggian_air'
+				statusKey='status_air'
+				unit='cm'
+				colorCondition={(status) =>
+					status === "Bahaya"
+						? "text-red-600"
+						: status === "Siaga"
+						? "text-yellow-600"
+						: "text-green-600"
+				}
+			/>
+
+			{/* 🌡️ Suhu Udara */}
+			<SensorTable
+				title='Suhu Udara'
+				valueKey='suhu_udara'
+				statusKey='status_suhu'
+				unit='°C'
+				colorCondition={(status) =>
+					status === "Suhu Panas"
+						? "text-red-600"
+						: status === "Suhu Lembap"
+						? "text-blue-600"
+						: "text-green-600"
+				}
+			/>
+
+			{/* 💨 Kecepatan Angin */}
+			<SensorTable
+				title='Kecepatan Angin'
+				valueKey='kecepatan_angin'
+				statusKey='status_angin'
+				unit='km/j'
+				colorCondition={(status) =>
+					status === "Angin Kencang"
+						? "text-red-600"
+						: status === "Angin Sedang"
+						? "text-yellow-600"
+						: "text-blue-600"
+				}
+			/>
 		</div>
 	)
 }
