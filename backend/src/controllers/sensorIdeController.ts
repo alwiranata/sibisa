@@ -24,14 +24,14 @@ export const addSensorDataIde = async (req: Request, res: Response) => {
 		}
 
 		let status_air = ""
-		if (dataSensor.ketinggian_air > 80 ) {
+		if (dataSensor.ketinggian_air > 80) {
 			status_air = "Normal"
 		} else if (
 			dataSensor.ketinggian_air > 50 &&
 			dataSensor.ketinggian_air <= 80
 		) {
 			status_air = "Siaga"
-		} else if (dataSensor.ketinggian_air <= 50 ) {
+		} else if (dataSensor.ketinggian_air <= 50) {
 			status_air = "Bahaya"
 		}
 
@@ -44,20 +44,27 @@ export const addSensorDataIde = async (req: Request, res: Response) => {
 			status_suhu = "Panas"
 		}
 
+		let kecepatan_angin: number = 0
 		let status_angin = ""
-		if (dataSensor.kecepatan_angin > 2 && dataSensor.kecepatan_angin <= 11) {
+		if (dataSensor.kecepatan_angin == dataSensor.curah_hujan) {
 			status_angin = "Angin Normal"
-		} else if (dataSensor.kecepatan_angin > 11) {
+			kecepatan_angin = 15
+		} else if (dataSensor.kecepatan_angin > dataSensor.curah_hujan) {
+			kecepatan_angin = 25
 			status_angin = "Angin Sedang"
-		} else {
+		} else if (
+			dataSensor.kecepatan_angin > dataSensor.curah_hujan &&
+			dataSensor.suhu_udara < 25
+		) {
 			status_angin = "Angin Kencang"
+			kecepatan_angin = 30
 		}
 
 		const data: sensorDataModel = {
 			curah_hujan: dataSensor.curah_hujan,
 			ketinggian_air: dataSensor.ketinggian_air,
 			suhu_udara: dataSensor.suhu_udara,
-			kecepatan_angin: dataSensor.kecepatan_angin,
+			kecepatan_angin: kecepatan_angin,
 			status_air: status_air,
 			status_hujan: status_hujan,
 			status_suhu: status_suhu,
