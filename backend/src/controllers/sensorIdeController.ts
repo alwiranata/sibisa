@@ -46,15 +46,21 @@ export const addSensorDataIde = async (req: Request, res: Response) => {
 
 		let kecepatan_angin: number = 0
 		let status_angin = ""
-		if (dataSensor.kecepatan_angin == dataSensor.curah_hujan) {
+		if (
+			dataSensor.kecepatan_angin == dataSensor.curah_hujan &&
+			dataSensor.suhu_udara > 30
+		) {
 			status_angin = "Angin Normal"
 			kecepatan_angin = 15
-		} else if (dataSensor.kecepatan_angin > dataSensor.curah_hujan) {
+		} else if (
+			dataSensor.kecepatan_angin > dataSensor.curah_hujan &&
+			dataSensor.suhu_udara <= 30 && dataSensor.suhu_udara > 25
+		) {
 			kecepatan_angin = 25
 			status_angin = "Angin Sedang"
 		} else if (
 			dataSensor.kecepatan_angin > dataSensor.curah_hujan &&
-			dataSensor.suhu_udara < 25
+			dataSensor.suhu_udara <= 25
 		) {
 			status_angin = "Angin Kencang"
 			kecepatan_angin = 30
