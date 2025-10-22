@@ -48,14 +48,14 @@ export const addSensorDataIde = async (req: Request, res: Response) => {
 		let status_angin = ""
 
 		if (status_suhu === "Lembap") {
-			kecepatan_angin = 10
-			status_angin = "Angin Pelan"
+			kecepatan_angin = 30
+			status_angin = "Angin Kencang"
 		} else if (status_suhu === "Normal") {
-			kecepatan_angin = 25
+			kecepatan_angin = 20
 			status_angin = "Angin Sedang"
 		} else if (status_suhu === "Panas") {
-			kecepatan_angin = 40
-			status_angin = "Angin Kencang"
+			kecepatan_angin = 10
+			status_angin = "Angin Normal"
 		}
 
 		const data: sensorDataModel = {
