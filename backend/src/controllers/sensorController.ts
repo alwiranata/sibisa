@@ -6,7 +6,7 @@ export const getSensorData = async (req: Request, res: Response) => {
 	try {
 		const data = await prisma.sensorData.findMany({
 			orderBy: {createdAt: "desc"},
-			take: 5,
+			take: 10,
 		})
 		res.json(data)
 	} catch (error) {
