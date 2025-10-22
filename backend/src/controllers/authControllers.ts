@@ -24,7 +24,8 @@ export const Login = async (req: Request, res: Response) => {
 
 		const token = jwt.sign(
 			{id: user.id, username: user.username},
-			JWT_SECRET // ← tidak ada expiresIn di sini
+			JWT_SECRET, // ← tidak ada expiresIn di sini
+			{ expiresIn: "1h" }
 		)
 
 		res.json({
