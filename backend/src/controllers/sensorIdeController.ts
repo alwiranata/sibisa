@@ -47,13 +47,13 @@ export const addSensorDataIde = async (req: Request, res: Response) => {
 		let kecepatan_angin = 0
 		let status_angin = ""
 
-		if (status_suhu === "Lembap") {
+		if (status_hujan === "Hujan Lebat") {
 			kecepatan_angin = 30
 			status_angin = "Angin Kencang"
-		} else if (status_suhu === "Normal") {
+		} else if (status_hujan === "Hujan Sedang") {
 			kecepatan_angin = 20
 			status_angin = "Angin Sedang"
-		} else if (status_suhu === "Panas") {
+		} else if (status_hujan === "Cerah") {
 			kecepatan_angin = 10
 			status_angin = "Angin Normal"
 		}
