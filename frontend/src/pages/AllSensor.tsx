@@ -155,7 +155,7 @@ const AllSensor = () => {
 			</div>
 
 			<h2 className='text-xl font-bold mb-4 text-[#2F4752]'>
-				5 Data Sensor Terbaru
+				Semua Data Sensor Terbaru
 			</h2>
 
 			<div className='overflow-x-auto'>
