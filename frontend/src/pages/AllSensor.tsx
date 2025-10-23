@@ -268,7 +268,7 @@ const AllSensor = () => {
 						? "text-red-600"
 						: status === "Angin Sedang"
 						? "text-yellow-600"
-						: "text-blue-600"
+						: "text-green-600"
 				}
 			/>
 		</div>
