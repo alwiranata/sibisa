@@ -264,9 +264,9 @@ const AllSensor = () => {
 				statusKey='status_angin'
 				unit='km/j'
 				colorCondition={(status) =>
-					status === "Angin Kencang"
+					status === "Kencang"
 						? "text-red-600"
-						: status === "Angin Sedang"
+						: status === "Sedang"
 						? "text-yellow-600"
 						: "text-green-600"
 				}
